@@ -1,0 +1,6 @@
+[package]
+name = "rustmain"
+version = "0.1.0"
+authors = ["samir seth <skseth@github.com>"]
+
+[dependencies]
