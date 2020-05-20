@@ -1,0 +1,5 @@
+*.o
+*.a
+aes_test
+aes_whitebox_compiler
+aes_whitebox_tables.cc
