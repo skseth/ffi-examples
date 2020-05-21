@@ -22,14 +22,54 @@ static void err_quit(const char *fmt, ...) {
   exit(1);
 }
 
+void tallymarker_hextobin(const char * str, uint8_t * bytes, size_t blen)
+{
+   uint8_t  pos;
+   uint8_t  idx0;
+   uint8_t  idx1;
+
+   // mapping of ASCII characters to hex values
+   const uint8_t hashmap[] =
+   {
+     0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, // 01234567
+     0x08, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // 89:;<=>?
+     0x00, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x00, // @ABCDEFG
+     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // HIJKLMNO
+   };
+
+   memset(bytes, 0, blen);
+   for (pos = 0; ((pos < (blen*2)) && (pos < strlen(str))); pos += 2)
+   {
+      idx0 = ((uint8_t)str[pos+0] & 0x1F) ^ 0x10;
+      idx1 = ((uint8_t)str[pos+1] & 0x1F) ^ 0x10;
+      bytes[pos/2] = (uint8_t)(hashmap[idx0] << 4) | hashmap[idx1];
+   };
+}
+
 static void read_hex(const char *in, uint8_t* v, size_t size, const char* param_name) {
   if (strlen(in) != size << 1) {
     err_quit("Invalid param %s (got %d, expected %d)",
         param_name, strlen(in), size << 1);
   }
+
+  tallymarker_hextobin(in, v, size);
+
+/*
   for (size_t i = 0; i < size; i++) {
     sscanf(in + i * 2, "%2hhx", v + i);
+  }*/
+}
+
+
+static void write_hex(const char *title, uint8_t* v, size_t size) {
+  printf("%s\n\n", title);
+
+  for (int i = 0; i < size; i++)
+  {
+      if (i > 0) printf(":");
+      printf("%02X", v[i]);
   }
+  printf("\n");
 }
 
 void syntax(const char* program_name) {
@@ -49,29 +89,21 @@ static const char CFB_CIPHER[] = "dc7e84bfda79164b7ecd8486985d386039ffed143b28b1
 int main() {
   uint8_t plain[4*16], iv_or_nonce[16], cipher[4*16], output[4*16];
 
+  printf("%s\n", CFB_PLAIN);
+
   read_hex(CFB_PLAIN, plain, 4*16, "plain");
   read_hex(CFB_IV, iv_or_nonce, 16, "iv-or-nonce");
   read_hex(CFB_CIPHER, cipher, 4*16, "cipher");
   
+  write_hex("Plain:", plain, 64);
   aes_whitebox_encrypt_cfb(iv_or_nonce, plain, sizeof(plain), output);
 
-  int i;
-  for (i = 0; i < 64; i++)
-  {
-      if (i > 0) printf(":");
-      printf("%02X", output[i]);
-  }
-  printf("\n");
+  write_hex("Encrypted:", output, 64);
 
   aes_whitebox_decrypt_cfb(iv_or_nonce, cipher, sizeof(cipher), output);
+  write_hex("Decrypted:", output, 64);
 
-  for (i = 0; i < 64; i++)
-  {
-      if (i > 0) printf(":");
-      printf("%02X", output[i]);
-  }
-  printf("\n");
-
+  return 0;
 }
 
 int read_string() {
@@ -109,4 +141,6 @@ int read_string() {
   }
 
   printf("Content : %s\n", content);
+
+  return 0;
 }

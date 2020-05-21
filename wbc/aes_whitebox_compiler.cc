@@ -373,7 +373,7 @@ void GenerateTables(const char* hexKey, int Nk, int Nr) {
   read_key(hexKey, key, Nk*4);
   ExpandKeys(key, roundKey, Nk, Nr);
 
-  FILE* out = fopen("aes_whitebox_tables.cc", "w");
+  FILE* out = fopen("key/aes_whitebox_tables.cc", "w");
 
   fprintf(out,
       "// This file is generated, do not edit.\n"

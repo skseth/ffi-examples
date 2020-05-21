@@ -25,5 +25,24 @@ Whitebox
 Support
 - Dockerfile
 
+# Setting up a Development Environment
+
+For mac, install ntl :
+
+- brew install ntl
+
+For Windows, more work is needed :
+
+- install msys2
+
+Start msys2 shell and run the following commands to install mingw-32 and mingw-64 toolchains (see [here](https://stackoverflow.com/questions/30069830/how-to-install-mingw-w64-and-msys2) for more details).
+
+```shell
+pacman -S mingw-w64-i686-gcc
+
+pacman -S mingw-w64-x86_64-gcc
+```
+
+
 
 
